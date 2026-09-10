@@ -61,6 +61,76 @@ class SettingsController extends Controller
     }
 
     /**
+     * Whether an option is a secret that must be masked in the settings page.
+     *
+     * @param string $type
+     * @return bool
+     */
+    private function isSecretFieldType(string $type): bool
+    {
+        return in_array($type, ['secret', 'password'], true);
+    }
+
+    /**
+     * Mask a field value according to its type. Secrets keep a few characters
+     * of the beginning and end visible, passwords are fully hidden.
+     *
+     * @param string $type
+     * @param string|null $value
+     * @return string|null
+     */
+    private function maskValueForType(string $type, ?string $value): ?string
+    {
+        if (!$this->isSecretFieldType($type)) {
+            return $value;
+        }
+
+        return $type === 'password'
+            ? self::maskPasswordValue($value)
+            : self::maskSecretValue($value);
+    }
+
+    /**
+     * Mask a secret value so only a few characters of the beginning and end
+     * remain visible, enough to identify which secret is set without leaking
+     * the full value. Returns null for empty values.
+     *
+     * @param string|null $value
+     * @return string|null
+     */
+    private static function maskSecretValue(?string $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $length = strlen($value);
+        $visible = 4;
+
+        if ($length <= $visible * 2) {
+            return str_repeat('*', $length);
+        }
+
+        return substr($value, 0, $visible) . str_repeat('*', 10) . substr($value, -$visible);
+    }
+
+    /**
+     * Fully mask a password so its value and length are never exposed.
+     * Returns null for empty values.
+     *
+     * @param string|null $value
+     * @return string|null
+     */
+    private static function maskPasswordValue(?string $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return str_repeat('*', 12);
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return Application|Factory|View|Response
@@ -91,10 +161,12 @@ class SettingsController extends Controller
             $categoryDescription = $optionInputData['category_description'] ?? null;
 
             foreach ($options as $key => $value) {
+                $type = $optionInputData[$key]['type'] ?? 'string';
+
                 $optionsData[$key] = [
-                    'value' => $value,
+                    'value' => $this->maskValueForType($type, $value),
                     'label' => $optionInputData[$key]['label'] ?? ucwords(str_replace('_', ' ', $key)),
-                    'type' => $optionInputData[$key]['type'] ?? 'string',
+                    'type' => $type,
                     'description' => $optionInputData[$key]['description'] ?? '',
                     'options' => $optionInputData[$key]['options'] ?? [],
                     'identifier' => $optionInputData[$key]['identifier'] ?? 'option',
@@ -103,7 +175,7 @@ class SettingsController extends Controller
                     'suffix' => $optionInputData[$key]['suffix'] ?? null,
                 ];
 
-                if($optionInputData[$key]['type'] === 'number') {
+                if($type === 'number') {
                     $optionsData[$key]['step'] = $optionInputData[$key]['step'] ?? '1';
 
                     if ($optionInputData[$key]['mustBeConverted'] ?? false) {
@@ -286,6 +358,9 @@ class SettingsController extends Controller
         }
 
         $settingsClass = new $resolvedSettingsClass();
+        $optionInputData = method_exists($resolvedSettingsClass, 'getOptionInputData')
+            ? $resolvedSettingsClass::getOptionInputData()
+            : [];
 
         foreach ($settingsClass->toArray() as $key => $value) {
             // Get the type of the settingsclass property
@@ -303,12 +378,19 @@ class SettingsController extends Controller
 
             $inputValue = $request->input($key);
 
-            // User/referral currency values are stored in thousandths.
-            if (method_exists($resolvedSettingsClass, 'getOptionInputData')) {
-                $optionInputData = $resolvedSettingsClass::getOptionInputData();
-                if (isset($optionInputData[$key]['mustBeConverted']) && $optionInputData[$key]['mustBeConverted'] && !is_null($inputValue) && $inputValue !== '') {
-                    $inputValue = Currency::prepareForDatabase($inputValue);
+            // Secret fields are only rendered as a masked placeholder. If the
+            // submitted value is empty or still equals that placeholder, keep
+            // the stored secret so saving other settings does not wipe it.
+            if ($this->isSecretFieldType($optionInputData[$key]['type'] ?? 'string')) {
+                $type = $optionInputData[$key]['type'] ?? 'string';
+                if ($inputValue === null || trim((string) $inputValue) === '' || $inputValue === $this->maskValueForType($type, $value)) {
+                    continue;
                 }
+            }
+
+            // User/referral currency values are stored in thousandths.
+            if (isset($optionInputData[$key]['mustBeConverted']) && $optionInputData[$key]['mustBeConverted'] && !is_null($inputValue) && $inputValue !== '') {
+                $inputValue = Currency::prepareForDatabase($inputValue);
             }
 
             $nullable = $rpType ? $rpType->allowsNull() : true;

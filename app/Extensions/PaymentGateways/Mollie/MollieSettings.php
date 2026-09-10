@@ -35,13 +35,13 @@ class MollieSettings extends Settings
                 'description' => 'Enable or disable this payment gateway',
             ],
             'api_key' => [
-                'type' => 'string',
+                'type' => 'secret',
                 'label' => 'API Key',
                 'description' => 'The API Key of your Mollie App',
                 'section' => 'credentials',
             ],
             'webhook_secret' => [
-                'type' => 'string',
+                'type' => 'secret',
                 'label' => 'Webhook Secret',
                 'description' => 'Secret token appended to webhook URLs to validate incoming requests',
                 'section' => 'credentials',

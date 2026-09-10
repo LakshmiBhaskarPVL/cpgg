@@ -9,7 +9,7 @@
             <div class="text-center card-header">
                 <a href="{{ route('welcome') }}" class="h1"><b>{{ config('app.name', 'CtrlPanel.gg') }}</b></a>
             </div>
-            <div class="card-body login-card-body">
+            <div class="card-body">
                 <p class="login-box-msg">{{ __('Two-Factor Authentication') }}</p>
                 <p class="text-center small text-muted">
                     {{ __('Select a verification method') }}
@@ -18,7 +18,7 @@
                 <div class="mt-3">
                     @foreach($methods as $method)
                         <a href="{{ route('login.2fa.method', ['method' => $method->getSettings('name')]) }}"
-                            class="d-flex align-items-center p-3 mb-2 bg-dark border border-secondary rounded text-decoration-none hover-shadow">
+                            class="d-flex align-items-center p-3 mb-2 border border-secondary rounded text-decoration-none hover-shadow">
                             <div class="mr-3">
                                 <i class="{{ $method->getSettings('icon') }} fa-lg text-primary"></i>
                             </div>

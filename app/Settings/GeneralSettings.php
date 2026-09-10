@@ -7,10 +7,10 @@ use Spatie\LaravelSettings\Settings;
 
 class GeneralSettings extends Settings
 {
-    public bool $store_enabled = false;
-    public ?float $sales_tax = null;
     public string $credits_display_name = 'Credits';
     public ?string $currency_format_override = null;
+    public bool $store_enabled = false;
+    public ?float $sales_tax = null;
     public ?string $recaptcha_version = null;
     public ?string $recaptcha_site_key = null;
     public ?string $recaptcha_secret_key = null;
@@ -104,7 +104,7 @@ class GeneralSettings extends Settings
                     'description' => 'The look of your panel',
                 ],
                 'recaptcha' => [
-                    'label' => 'reCAPTCHA',
+                    'label' => 'Captcha',
                     'description' => 'Protect the login page against bots',
                 ],
                 'phpmyadmin' => [
@@ -115,6 +115,18 @@ class GeneralSettings extends Settings
                     'label' => 'Alert',
                     'description' => 'Display a global alert on the home page',
                 ],
+            ],
+            'credits_display_name' => [
+                'type' => 'string',
+                'label' => 'Credits Display Name',
+                'description' => 'The name of the currency used',
+            ],
+            'currency_format_override' => [
+                'type' => 'select',
+                'label' => 'Currency Format Override',
+                'description' => 'Force all currency displays to use this locale\'s formatting, overriding the current locale',
+                'options' => array_merge(['' => 'Auto (Use Current Locale)'], self::getCurrencyFormatOptions()),
+                'identifier' => 'value',
             ],
             'store_enabled' => [
                 'type' => 'boolean',
@@ -129,27 +141,13 @@ class GeneralSettings extends Settings
                 'step' => '0.01',
                 'section' => 'store',
             ],
-            'credits_display_name' => [
-                'type' => 'string',
-                'label' => 'Credits Display Name',
-                'description' => 'The name of the currency used',
-                'section' => 'store',
-            ],
-            'currency_format_override' => [
-                'type' => 'select',
-                'label' => 'Currency Format Override',
-                'description' => 'Force all currency displays to use this locale\'s formatting, overriding the current locale',
-                'options' => array_merge(['' => 'Auto (Use Current Locale)'], self::getCurrencyFormatOptions()),
-                'identifier' => 'value',
-                'section' => 'store',
-            ],
             'recaptcha_version' => [
                 'type' => 'select',
-                'label' => 'reCAPTCHA Version',
-                'description' => 'Enable reCAPTCHA on the login page',
+                'label' => 'Captcha Version',
+                'description' => 'Enable a captcha on the login page',
                 'options' => [
-                    'v2' => 'Recaptcha V2',
-                    'v3' => 'Recaptcha v3',
+                    'v2' => 'Google reCAPTCHA V2',
+                    'v3' => 'Google reCAPTCHA v3',
                     'turnstile' => 'Cloudflare Turnstile',
                     null => 'Disable',
                 ],
@@ -157,14 +155,14 @@ class GeneralSettings extends Settings
             ],
             'recaptcha_site_key' => [
                 'type' => 'string',
-                'label' => 'reCAPTCHA Site Key',
-                'description' => 'The site key for reCAPTCHA',
+                'label' => 'Captcha Site Key',
+                'description' => 'The site key for the captcha',
                 'section' => 'recaptcha',
             ],
             'recaptcha_secret_key' => [
-                'type' => 'string',
-                'label' => 'reCAPTCHA Secret Key',
-                'description' => 'The secret key for reCAPTCHA',
+                'type' => 'secret',
+                'label' => 'Captcha Secret Key',
+                'description' => 'The secret key for the captcha',
                 'section' => 'recaptcha',
             ],
             'phpmyadmin_url' => [
