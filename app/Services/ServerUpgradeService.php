@@ -58,6 +58,11 @@ class ServerUpgradeService
             }
 
             $pterodactylServerAllocation = $pterodactylServer['allocation'];
+
+            // Apply the new resource limits on Pterodactyl. Throws a
+            // PterodactylException on failure so the server is left untouched.
+            $this->pterodactylClient->updateServerBuild($server->pterodactyl_id, $pterodactylServerAllocation, $product);
+
             $powerActionResponse = $this->pterodactylClient->powerAction($server, 'restart');
 
             if ($powerActionResponse->failed()) {
