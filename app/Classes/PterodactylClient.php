@@ -642,7 +642,8 @@ class PterodactylClient
      * @param  int  $requireDisk
      * @return bool
      *
-     * @throws PterodactylException
+     * @throws PterodactylException On network failures. HTTP errors fail
+     *                              closed and return false.
      */
     public function checkNodeResources(Node $node, int $requireMemory, int $requireDisk)
     {
@@ -653,10 +654,9 @@ class PterodactylClient
         }
 
         if ($response->failed()) {
-            self::throwException(
-                'Failed to get node resources from Pterodactyl',
-                $response->status()
-            );
+            // Fail closed: if a node's resource usage cannot be determined, do
+            // not consider it available so server creation can try other nodes.
+            return false;
         }
 
         $node = $response['attributes'];
