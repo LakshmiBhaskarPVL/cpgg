@@ -16,4 +16,14 @@ class PterodactylPermissionException extends PterodactylException
     {
         parent::__construct($message, 403, $previous);
     }
+
+    /**
+     * Get a message that is safe to show to end users.
+     *
+     * @return string
+     */
+    public function getPublicMessage(): string
+    {
+        return 'Internal configuration error. Please contact an administrator.';
+    }
 }

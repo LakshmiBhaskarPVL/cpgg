@@ -18,4 +18,14 @@ class PterodactylNotFoundException extends PterodactylException
     {
         parent::__construct($message, 404, $previous);
     }
+
+    /**
+     * Get a message that is safe to show to end users.
+     *
+     * @return string
+     */
+    public function getPublicMessage(): string
+    {
+        return 'Resource not found.';
+    }
 }

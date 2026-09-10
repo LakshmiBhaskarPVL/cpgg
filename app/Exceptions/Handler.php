@@ -58,7 +58,7 @@ class Handler extends ExceptionHandler
 
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => $e->getMessage(),
+                    'message' => $e->getPublicMessage(),
                 ], $status);
             }
 
@@ -69,7 +69,7 @@ class Handler extends ExceptionHandler
                         'exception' => $e,
                         'errorCode' => $status,
                         'title' => 'Error',
-                        'message' => $e->getMessage(),
+                        'message' => $e->getPublicMessage(),
                         'homeLink' => true,
                     ],
                     $status
@@ -83,7 +83,7 @@ class Handler extends ExceptionHandler
         $this->renderable(function (ServerException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => $e->getMessage(),
+                    'message' => $e->getPublicMessage(),
                 ], $e->getStatusCode());
             }
 
@@ -97,7 +97,7 @@ class Handler extends ExceptionHandler
 
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => $e->getMessage(),
+                    'message' => $e->getPublicMessage(),
                 ], $status);
             }
 
@@ -108,7 +108,7 @@ class Handler extends ExceptionHandler
                         'exception' => $e,
                         'errorCode' => $status,
                         'title' => 'Error',
-                        'message' => $e->getMessage(),
+                        'message' => $e->getPublicMessage(),
                         'homeLink' => true,
                     ],
                     $status

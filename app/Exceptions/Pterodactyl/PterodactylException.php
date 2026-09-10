@@ -21,6 +21,14 @@ class PterodactylException extends Exception
     protected ?int $statusCode;
 
     /**
+     * A safe message intended to be shown to end users. When null, a generic
+     * fallback is used so raw client details never leak to the public API/UI.
+     *
+     * @var string|null
+     */
+    protected ?string $publicMessage = null;
+
+    /**
      * @param  string  $message
      * @param  int|null  $statusCode
      * @param  \Throwable|null  $previous
@@ -40,5 +48,20 @@ class PterodactylException extends Exception
     public function getStatusCode(): ?int
     {
         return $this->statusCode;
+    }
+
+    /**
+     * Get a message that is safe to show to end users.
+     *
+     * The raw message (getMessage()) may contain internal infrastructure
+     * details (node host/port, TLS/DNS errors, Guzzle traces) and must not
+     * leak through the public API/UI. Subclasses override this to provide
+     * their own fixed public wording.
+     *
+     * @return string
+     */
+    public function getPublicMessage(): string
+    {
+        return $this->publicMessage ?? 'Failed to complete the request. Please try again later.';
     }
 }

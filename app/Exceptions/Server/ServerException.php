@@ -39,4 +39,18 @@ class ServerException extends Exception
     {
         return $this->statusCode;
     }
+
+    /**
+     * Get a message that is safe to show to end users.
+     *
+     * Server exceptions already carry business-oriented messages, but the
+     * method is kept for uniformity with the rest of the hierarchy so future
+     * "raw" subclasses can override it without changing the renderers.
+     *
+     * @return string
+     */
+    public function getPublicMessage(): string
+    {
+        return $this->getMessage();
+    }
 }

@@ -16,4 +16,14 @@ class PterodactylServerException extends PterodactylException
     {
         parent::__construct($message, $statusCode, $previous);
     }
+
+    /**
+     * Get a message that is safe to show to end users.
+     *
+     * @return string
+     */
+    public function getPublicMessage(): string
+    {
+        return 'Service temporarily unavailable. Please try again later.';
+    }
 }

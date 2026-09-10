@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\Pterodactyl\PterodactylAuthenticationException;
 use App\Exceptions\Pterodactyl\PterodactylConnectionException;
 use App\Exceptions\Pterodactyl\PterodactylNotFoundException;
+use App\Exceptions\Pterodactyl\PterodactylServerException;
 use App\Exceptions\Server\InsufficientCreditsException;
 use App\Exceptions\Server\ServerLimitReachedException;
 use App\Exceptions\Payment\InvoiceException;
@@ -30,7 +32,7 @@ class TestExceptionRendering extends TestCase
         $response = $handler->render($request, new PterodactylNotFoundException());
 
         $this->assertSame(404, $response->getStatusCode());
-        $this->assertStringContainsString('Resource does not exist', $response->getContent());
+        $this->assertSame('Resource not found.', $response->getData(true)['message']);
     }
 
     /**
@@ -70,7 +72,94 @@ class TestExceptionRendering extends TestCase
         $response = $handler->render($request, new PterodactylConnectionException());
 
         $this->assertSame(500, $response->getStatusCode());
-        $this->assertStringContainsString('Unable to connect', $response->getContent());
+        $this->assertSame('Unable to connect to the server node. Please try again later.', $response->getData(true)['message']);
+    }
+
+    /**
+     * Verify the public response for a PterodactylConnectionException does not
+     * leak raw details of the underlying client exception (hosts, ports, TLS
+     * traces), while the raw message stays available for logging.
+     *
+     * @return void
+     */
+    public function test_pterodactyl_connection_hides_raw_details(): void
+    {
+        $handler = new \App\Exceptions\Handler($this->app);
+
+        $request = \Illuminate\Http\Request::create('/api/test', 'GET');
+        $request->headers->set('Accept', 'application/json');
+
+        $exception = new PterodactylConnectionException(
+            'cURL error 7: Failed to connect to node-internal-01.example.internal port 8443',
+            new \RuntimeException('TLS handshake with 10.0.0.5 failed')
+        );
+
+        $response = $handler->render($request, $exception);
+
+        $this->assertSame(500, $response->getStatusCode());
+
+        $this->assertSame('Unable to connect to the server node. Please try again later.', $response->getData(true)['message']);
+        $this->assertStringNotContainsString('node-internal-01.example.internal', $response->getContent());
+        $this->assertStringNotContainsString('10.0.0.5', $response->getContent());
+
+        // The raw details must still be available for logging.
+        $this->assertStringContainsString('node-internal-01.example.internal', $exception->getMessage());
+    }
+
+    /**
+     * Verify the public response for a PterodactylServerException (5xx) does
+     * not leak raw details while the raw message stays available for logging.
+     *
+     * @return void
+     */
+    public function test_pterodactyl_server_exception_hides_raw_details(): void
+    {
+        $handler = new \App\Exceptions\Handler($this->app);
+
+        $request = \Illuminate\Http\Request::create('/api/test', 'GET');
+        $request->headers->set('Accept', 'application/json');
+
+        $exception = new PterodactylServerException(
+            'Pterodactyl node error (HTTP 500) - cURL error 56: internal node 10.0.0.5 unreachable',
+            500,
+            new \RuntimeException('Guzzle HTTP/1.1 500 on internal node')
+        );
+
+        $response = $handler->render($request, $exception);
+
+        $this->assertSame(500, $response->getStatusCode());
+
+        $this->assertSame('Service temporarily unavailable. Please try again later.', $response->getData(true)['message']);
+        $this->assertStringNotContainsString('10.0.0.5', $response->getContent());
+
+        // The raw details must still be available for logging.
+        $this->assertStringContainsString('10.0.0.5', $exception->getMessage());
+    }
+
+    /**
+     * Verify the public response for a PterodactylAuthenticationException does
+     * not leak configuration details (token/env paths) to the client.
+     *
+     * @return void
+     */
+    public function test_pterodactyl_authentication_hides_config_details(): void
+    {
+        $handler = new \App\Exceptions\Handler($this->app);
+
+        $request = \Illuminate\Http\Request::create('/api/test', 'GET');
+        $request->headers->set('Accept', 'application/json');
+
+        $exception = new PterodactylAuthenticationException(
+            'No Pterodactyl token set - /etc/cpgg/.env'
+        );
+
+        $response = $handler->render($request, $exception);
+
+        $this->assertSame(401, $response->getStatusCode());
+
+        $this->assertSame('Internal configuration error. Please contact an administrator.', $response->getData(true)['message']);
+        $this->assertStringNotContainsString('No Pterodactyl token set', $response->getContent());
+        $this->assertStringNotContainsString('/etc/cpgg', $response->getContent());
     }
 
     /**
