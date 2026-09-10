@@ -400,9 +400,6 @@ class PterodactylClient
                 $e
             );
         }
-        if ($response->failed()) {
-            self::throwException('Failed to get server by external_id from Pterodactyl', $response->status());
-        }
 
         return $response;
     }
