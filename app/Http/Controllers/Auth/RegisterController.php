@@ -15,7 +15,10 @@ use App\Settings\ReferralSettings;
 use App\Settings\UserSettings;
 use App\Settings\WebsiteSettings;
 use App\Actions\ProcessReferralAction;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -67,6 +70,40 @@ class RegisterController extends Controller
         $this->userSettings = $userSettings;
         $this->referralSettings = $referralSettings;
         $this->processReferralAction = $processReferralAction;
+    }
+
+    /**
+     * Handle a registration request for the application.
+     *
+     * Surfaces a Pterodactyl account-creation failure as a validation error so
+     * the user sees a friendly message instead of a bare 500.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
+    public function register(Request $request)
+    {
+        $this->validator($request->all())->validate();
+
+        try {
+            $user = $this->create($request->all());
+        } catch (PterodactylRegistrationException $e) {
+            throw ValidationException::withMessages([
+                'ptero_registration_error' => [__('Failed to create account on Pterodactyl. Please contact Support!')],
+            ]);
+        }
+
+        event(new Registered($user));
+
+        $this->guard()->login($user);
+
+        if ($response = $this->registered($request, $user)) {
+            return $response;
+        }
+
+        return $request->wantsJson()
+            ? new JsonResponse([], 201)
+            : redirect($this->redirectPath());
     }
 
     /**
