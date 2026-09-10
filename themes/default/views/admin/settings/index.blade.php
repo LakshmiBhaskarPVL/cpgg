@@ -330,7 +330,7 @@
 								@if ($sectionKey === 'recaptcha' && !empty($section['options']))
                                                         <div class="row">
                                                             <div class="col-md-4 col-12 d-flex align-items-center">
-                                                                <label class="w-100 mb-0" for="recaptcha_preview">{{ __('ReCAPTCHA Preview') }}</label>
+                                                                <label class="w-100 mb-0" for="recaptcha_preview">{{ __('Captcha Preview') }}</label>
                                                             </div>
 
                                                             <div class="col-md-8 col-12">
@@ -360,7 +360,7 @@
                                                                     <div class="alert alert-secondary mb-0 py-2 d-flex align-items-center">
                                                                         <i class="fas fa-info-circle mr-2"></i>
                                                                         <span class="small">
-                                                                            {{ __('reCAPTCHA is not configured yet, select a version and provide a site key to see the preview') }}
+                                                                            {{ __('Captcha is not configured yet, select a version and provide a site key to see the preview') }}
                                                                         </span>
                                                                     </div>
                                                                 @endif
