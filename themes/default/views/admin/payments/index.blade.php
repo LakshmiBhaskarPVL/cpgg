@@ -68,15 +68,15 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            window.confirmStatusUpdate = function (url, status) {
+            window.confirmAndSubmit = function (url, status, text, color) {
                 Swal.fire({
                     title: "{{ __('Are you sure?') }}",
-                    text: "{{ __('This will forcibly mark the payment as PAID and trigger all related actions.') }}",
+                    text: text,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: "{{ __('Yes, confirm it!') }}",
+                    confirmButtonColor: color || '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: "{{ __('Yes, continue!') }}",
                     cancelButtonText: "{{ __('Cancel') }}",
                 }).then((result) => {
                     if (result.isConfirmed) {
@@ -89,28 +89,6 @@
                         }
                         document.body.appendChild(form);
                         form.submit();
-                    }
-                });
-            }
-
-            // Status switcher: ask for confirmation before moving a payment to another status.
-            window.requestStatusChange = function (select) {
-                const status = select.value;
-                if (!status) return;
-                Swal.fire({
-                    title: "{{ __('Change payment status?') }}",
-                    text: "{{ __('This will move the payment to: ') }}" + status,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: "{{ __('Yes, change it!') }}",
-                    cancelButtonText: "{{ __('Cancel') }}",
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        select.form.submit();
-                    } else {
-                        select.value = '';
                     }
                 });
             }
