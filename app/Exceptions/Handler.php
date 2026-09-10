@@ -2,7 +2,6 @@
 
 namespace App\Exceptions;
 
-use App\Exceptions\Api\ApiException;
 use App\Exceptions\Pterodactyl\PterodactylException;
 use App\Exceptions\Server\ServerException;
 use App\Exceptions\Payment\PaymentException;
@@ -50,17 +49,6 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
-        });
-
-        // Render API exceptions as JSON with their HTTP status code.
-        $this->renderable(function (ApiException $e, $request) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => $e->getMessage(),
-                ], $e->getStatusCode());
-            }
-
-            return null;
         });
 
         // Render Pterodactyl exceptions with a mapped status code.

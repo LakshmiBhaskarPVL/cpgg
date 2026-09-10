@@ -2,7 +2,6 @@
 
 namespace Tests\Unit;
 
-use App\Exceptions\Api\ApiException;
 use App\Exceptions\Auth\PterodactylRegistrationException;
 use App\Exceptions\Discord\DiscordException;
 use App\Exceptions\Payment\InvoiceException;
@@ -25,21 +24,6 @@ use PHPUnit\Framework\TestCase;
 
 class TestExceptions extends TestCase
 {
-    public function test_api_exception_defaults_to_500(): void
-    {
-        $exception = new ApiException('Something went wrong');
-
-        $this->assertSame('Something went wrong', $exception->getMessage());
-        $this->assertSame(500, $exception->getStatusCode());
-    }
-
-    public function test_api_exception_custom_status_code(): void
-    {
-        $exception = new ApiException('Not found', 404);
-
-        $this->assertSame(404, $exception->getStatusCode());
-    }
-
     public function test_pterodactyl_exception_carries_status_code(): void
     {
         $exception = new PterodactylException('Request failed', 500);

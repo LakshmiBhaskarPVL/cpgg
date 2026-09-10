@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Exceptions\Api\ApiException;
 use App\Exceptions\Pterodactyl\PterodactylConnectionException;
 use App\Exceptions\Pterodactyl\PterodactylNotFoundException;
 use App\Exceptions\Server\InsufficientCreditsException;
@@ -14,31 +13,6 @@ use Tests\CreatesApplication;
 class TestExceptionRendering extends TestCase
 {
     use CreatesApplication;
-
-    /**
-     * Verify that an ApiException is rendered as JSON with its status code
-     * for API requests.
-     *
-     * @return void
-     */
-    public function test_api_exception_renders_json_with_status_code(): void
-    {
-        $handler = new \App\Exceptions\Handler($this->app);
-
-        $request = \Illuminate\Http\Request::create('/api/test', 'GET');
-        $request->headers->set('Accept', 'application/json');
-
-        $response = $handler->render(
-            $request,
-            new ApiException('Custom error', 418)
-        );
-
-        $this->assertSame(418, $response->getStatusCode());
-        $this->assertSame(
-            ['message' => 'Custom error'],
-            $response->getData(true)
-        );
-    }
 
     /**
      * Verify the exception handler maps a PterodactylNotFoundException to a
@@ -113,25 +87,6 @@ class TestExceptionRendering extends TestCase
         $response = $handler->render($request, new ServerLimitReachedException());
 
         $this->assertSame(422, $response->getStatusCode());
-    }
-
-    /**
-     * Verify the exception handler maps a generic ApiException to its status
-     * code.
-     *
-     * @return void
-     */
-    public function test_generic_api_exception_renders_status_code(): void
-    {
-        $handler = new \App\Exceptions\Handler($this->app);
-
-        $request = \Illuminate\Http\Request::create('/api/test', 'GET');
-        $request->headers->set('Accept', 'application/json');
-
-        $response = $handler->render($request, new ApiException('Custom error', 418));
-
-        $this->assertSame(418, $response->getStatusCode());
-        $this->assertStringContainsString('Custom error', $response->getContent());
     }
 
     public function test_invoice_exception_renders_404_json(): void
