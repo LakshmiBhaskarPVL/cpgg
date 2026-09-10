@@ -51,7 +51,8 @@ class Handler extends ExceptionHandler
             //
         });
 
-        // Render Pterodactyl exceptions with a mapped status code.
+        // Render Pterodactyl exceptions as JSON for API requests and with the
+        // matching error page for web requests.
         $this->renderable(function (PterodactylException $e, $request) {
             $status = $e->getStatusCode() ?? 500;
 
@@ -59,6 +60,20 @@ class Handler extends ExceptionHandler
                 return response()->json([
                     'message' => $e->getMessage(),
                 ], $status);
+            }
+
+            if (view()->exists('errors.' . $status)) {
+                return response()->view(
+                    'errors.' . $status,
+                    [
+                        'exception' => $e,
+                        'errorCode' => $status,
+                        'title' => 'Error',
+                        'message' => $e->getMessage(),
+                        'homeLink' => true,
+                    ],
+                    $status
+                );
             }
 
             return null;

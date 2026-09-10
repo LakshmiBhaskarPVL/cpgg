@@ -34,6 +34,26 @@ class TestExceptionRendering extends TestCase
     }
 
     /**
+     * Verify the handler renders the matching web error page for a
+     * PterodactylNotFoundException on non-JSON requests (instead of a generic
+     * 500 as would happen for an unhandled exception).
+     *
+     * @return void
+     */
+    public function test_pterodactyl_not_found_renders_web_error_page(): void
+    {
+        $handler = new \App\Exceptions\Handler($this->app);
+
+        $request = \Illuminate\Http\Request::create('/servers', 'GET');
+
+        $response = $handler->render($request, new PterodactylNotFoundException());
+
+        $this->assertSame(404, $response->getStatusCode());
+        $this->assertStringContainsString('Not Found', $response->getContent());
+        $this->assertStringNotContainsString('"message"', $response->getContent());
+    }
+
+    /**
      * Verify the exception handler maps a PterodactylConnectionException
      * (which carries no HTTP status code) to a 500 JSON response instead of
      * crashing on an invalid status code.
