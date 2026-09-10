@@ -330,18 +330,21 @@ class PaymentController extends Controller
                     }
                 }
 
-                // Status switcher: allow the admin to move the payment to any other status.
-                $availableStatuses = array_filter(PaymentStatus::cases(), fn(PaymentStatus $s) => $s !== $payment->status);
-                if (count($availableStatuses) > 0) {
-                    $options = '';
-                    foreach ($availableStatuses as $status) {
-                        $options .= '<option value="' . $status->value . '">' . ucfirst($status->value) . '</option>';
+                // Status switcher: allow the admin to move a non-paid payment to another status.
+                // PAID payments are terminal and never get a switcher here.
+                if ($payment->status !== PaymentStatus::PAID) {
+                    $availableStatuses = array_filter(PaymentStatus::cases(), fn(PaymentStatus $s) => $s !== $payment->status);
+                    if (count($availableStatuses) > 0) {
+                        $options = '';
+                        foreach ($availableStatuses as $status) {
+                            $options .= '<option value="' . $status->value . '">' . ucfirst($status->value) . '</option>';
+                        }
+                        $actions .= '<form method="POST" action="' . route('admin.payments.statusUpdate', $payment->id) . '" style="display:inline-block;">' . csrf_field()
+                            . '<select name="status" class="form-control form-control-sm d-inline-block w-auto" onchange="requestStatusChange(this)">'
+                            . '<option value="" disabled selected>' . __('Set status') . '</option>'
+                            . $options
+                            . '</select></form>';
                     }
-                    $actions .= '<form method="POST" action="' . route('admin.payments.statusUpdate', $payment->id) . '" style="display:inline-block;">' . csrf_field()
-                        . '<select name="status" class="form-control form-control-sm d-inline-block w-auto" onchange="this.form.submit()">'
-                        . '<option value="" disabled selected>' . __('Set status') . '</option>'
-                        . $options
-                        . '</select></form>';
                 }
 
                 return $actions;
@@ -368,7 +371,13 @@ class PaymentController extends Controller
             return redirect()->route('admin.payments.index')->with('error', __('Payment is already :status.', ['status' => $status->value]));
         }
 
-        $wasPaid = $payment->status === PaymentStatus::PAID;
+        // A paid payment is terminal: moving it to another status would leave the
+        // delivered credits/products/invoice in place while marking the payment
+        // as not paid, and would allow a PAID -> X -> PAID cycle that triggers
+        // the payment events again, granting the user credits twice.
+        if ($payment->status === PaymentStatus::PAID) {
+            return redirect()->route('admin.payments.index')->with('error', __('A paid payment cannot be moved to another status.'));
+        }
 
         $payment->status = $status;
         $payment->save();
@@ -376,7 +385,9 @@ class PaymentController extends Controller
         $user = User::findOrFail($payment->user_id);
 
         // Only trigger payment-related actions when the payment transitions to PAID.
-        if ($status === PaymentStatus::PAID && !$wasPaid) {
+        // Reaching this point means the payment was not PAID before (a PAID payment
+        // is rejected above), so triggering on every PAID transition is safe.
+        if ($status === PaymentStatus::PAID) {
             $shopProduct = ShopProduct::findOrFail($payment->shop_item_product_id);
 
             if ($payment->coupon_code) {

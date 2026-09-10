@@ -93,6 +93,28 @@
                 });
             }
 
+            // Status switcher: ask for confirmation before moving a payment to another status.
+            window.requestStatusChange = function (select) {
+                const status = select.value;
+                if (!status) return;
+                Swal.fire({
+                    title: "{{ __('Change payment status?') }}",
+                    text: "{{ __('This will move the payment to: ') }}" + status,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: "{{ __('Yes, change it!') }}",
+                    cancelButtonText: "{{ __('Cancel') }}",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        select.form.submit();
+                    } else {
+                        select.value = '';
+                    }
+                });
+            }
+
             $('#datatable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.11.3/i18n/{{ $locale_datatables }}.json'
