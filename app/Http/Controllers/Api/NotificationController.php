@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\Api\ApiException;
 use App\Http\Resources\NotificationResource;
 use App\Models\User;
 use App\Http\Controllers\Controller;
@@ -16,7 +15,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Throwable;
+use Exception;
 
 /**
  * @group Notifications
@@ -112,7 +111,7 @@ class NotificationController extends Controller
         try {
             $data = $request->validated();
 
-            $via = match ($data['via']) {
+            $via = match($data['via']) {
                 'mail' => ['mail'],
                 'database' => ['database'],
                 'both' => ['mail', 'database'],
@@ -137,8 +136,11 @@ class NotificationController extends Controller
                     'channels' => $via
                 ]
             ]);
-        } catch (Throwable $e) {
-            throw new ApiException('Failed to send notification.', 500, $e);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Failed to send notification.',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -161,7 +163,7 @@ class NotificationController extends Controller
         try {
             $data = $request->validated();
 
-            $via = match ($data['via']) {
+            $via = match($data['via']) {
                 'mail' => ['mail'],
                 'database' => ['database'],
                 'both' => ['mail', 'database'],
@@ -186,8 +188,11 @@ class NotificationController extends Controller
                     'channels' => $via
                 ]
             ]);
-        } catch (Throwable $e) {
-            throw new ApiException('Failed to send notification.', 500, $e);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Failed to send notification.',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 
