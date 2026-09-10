@@ -66,12 +66,12 @@ class PterodactylSettings extends Settings
             ],
             'admin_token' => [
                 'label' => 'Admin Token',
-                'type' => 'string',
+                'type' => 'secret',
                 'description' => 'The admin user token for your Pterodactyl panel',
             ],
             'user_token' => [
                 'label' => 'User Token',
-                'type' => 'string',
+                'type' => 'secret',
                 'description' => 'The user token for your Pterodactyl panel',
             ],
             'per_page_limit' => [

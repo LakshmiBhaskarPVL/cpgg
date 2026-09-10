@@ -41,13 +41,13 @@ class MercadoPagoSettings extends Settings
                 'description' => 'Enable or disable this payment gateway',
             ],
             'access_token' => [
-                'type' => 'string',
+                'type' => 'secret',
                 'label' => 'Access Token Key',
                 'description' => 'The Access Token of your Mercado Pago App',
                 'section' => 'credentials',
             ],
             'webhook_secret' => [
-                'type' => 'string',
+                'type' => 'secret',
                 'label' => 'Webhook Secret',
                 'description' => 'Secret token appended to webhook URLs to validate incoming requests',
                 'section' => 'credentials',

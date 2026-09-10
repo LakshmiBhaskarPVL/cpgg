@@ -233,6 +233,14 @@
                                                                                 value="{{ $value['value'] }}">
                                                                         @break
 
+                                                                        @case($value['type'] == 'secret')
+                                                                            <input type="text" class="form-control"
+                                                                                name="{{ $key }}"
+                                                                                value="{{ $value['value'] }}"
+                                                                                autocomplete="off"
+                                                                                spellcheck="false">
+                                                                        @break
+
                                                                         @case($value['type'] == 'password')
                                                                             <input type="password" class="form-control"
                                                                                 name="{{ $key }}"

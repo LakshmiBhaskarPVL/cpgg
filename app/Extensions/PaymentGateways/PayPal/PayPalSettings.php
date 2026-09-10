@@ -54,7 +54,7 @@ class PayPalSettings extends Settings
                 'section' => 'production',
             ],
             'client_secret' => [
-                'type' => 'string',
+                'type' => 'secret',
                 'label' => 'Client Secret',
                 'description' => 'The Client Secret of your PayPal App',
                 'section' => 'production',
@@ -72,7 +72,7 @@ class PayPalSettings extends Settings
                 'section' => 'sandbox',
             ],
             'sandbox_client_secret' => [
-                'type' => 'string',
+                'type' => 'secret',
                 'label' => 'Sandbox Client Secret',
                 'description' => 'The Sandbox Client Secret  used when app_env = local',
                 'section' => 'sandbox',

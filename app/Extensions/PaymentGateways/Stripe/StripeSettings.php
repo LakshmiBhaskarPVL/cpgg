@@ -50,13 +50,13 @@ class StripeSettings extends Settings
                 'section' => 'production',
             ],
             'secret_key' => [
-                'type' => 'string',
+                'type' => 'secret',
                 'label' => 'Secret Key',
                 'description' => 'The Secret Key of your Stripe App',
                 'section' => 'production',
             ],
             'webhook_signing_secret' => [
-                'type' => 'string',
+                'type' => 'secret',
                 'label' => 'Webhook Signing Secret',
                 'description' => 'The Stripe webhook signing secret (whsec_...) for production endpoints',
                 'section' => 'production',
@@ -68,13 +68,13 @@ class StripeSettings extends Settings
                 'section' => 'test',
             ],
             'test_secret_key' => [
-                'type' => 'string',
+                'type' => 'secret',
                 'label' => 'Test Secret Key',
                 'description' => 'The Test Secret Key used when app_env = local',
                 'section' => 'test',
             ],
             'test_webhook_signing_secret' => [
-                'type' => 'string',
+                'type' => 'secret',
                 'label' => 'Test Webhook Signing Secret',
                 'description' => 'The Stripe test webhook signing secret (whsec_...) used when app_env = local',
                 'section' => 'test',

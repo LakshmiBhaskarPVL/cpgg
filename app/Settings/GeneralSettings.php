@@ -7,10 +7,10 @@ use Spatie\LaravelSettings\Settings;
 
 class GeneralSettings extends Settings
 {
-    public bool $store_enabled = false;
-    public ?float $sales_tax = null;
     public string $credits_display_name = 'Credits';
     public ?string $currency_format_override = null;
+    public bool $store_enabled = false;
+    public ?float $sales_tax = null;
     public ?string $recaptcha_version = null;
     public ?string $recaptcha_site_key = null;
     public ?string $recaptcha_secret_key = null;
@@ -116,6 +116,18 @@ class GeneralSettings extends Settings
                     'description' => 'Display a global alert on the home page',
                 ],
             ],
+            'credits_display_name' => [
+                'type' => 'string',
+                'label' => 'Credits Display Name',
+                'description' => 'The name of the currency used',
+            ],
+            'currency_format_override' => [
+                'type' => 'select',
+                'label' => 'Currency Format Override',
+                'description' => 'Force all currency displays to use this locale\'s formatting, overriding the current locale',
+                'options' => array_merge(['' => 'Auto (Use Current Locale)'], self::getCurrencyFormatOptions()),
+                'identifier' => 'value',
+            ],
             'store_enabled' => [
                 'type' => 'boolean',
                 'label' => 'Enable Store',
@@ -127,20 +139,6 @@ class GeneralSettings extends Settings
                 'label' => 'Sales Tax in %',
                 'description' => 'Your countrys sales tax in %',
                 'step' => '0.01',
-                'section' => 'store',
-            ],
-            'credits_display_name' => [
-                'type' => 'string',
-                'label' => 'Credits Display Name',
-                'description' => 'The name of the currency used',
-                'section' => 'store',
-            ],
-            'currency_format_override' => [
-                'type' => 'select',
-                'label' => 'Currency Format Override',
-                'description' => 'Force all currency displays to use this locale\'s formatting, overriding the current locale',
-                'options' => array_merge(['' => 'Auto (Use Current Locale)'], self::getCurrencyFormatOptions()),
-                'identifier' => 'value',
                 'section' => 'store',
             ],
             'recaptcha_version' => [
@@ -162,7 +160,7 @@ class GeneralSettings extends Settings
                 'section' => 'recaptcha',
             ],
             'recaptcha_secret_key' => [
-                'type' => 'string',
+                'type' => 'secret',
                 'label' => 'reCAPTCHA Secret Key',
                 'description' => 'The secret key for reCAPTCHA',
                 'section' => 'recaptcha',

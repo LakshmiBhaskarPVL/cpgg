@@ -67,7 +67,7 @@ class DiscordSettings extends Settings
             ],
             'bot_token' => [
                 'label' => 'Bot Token',
-                'type' => 'string',
+                'type' => 'secret',
                 'description' => 'The bot token for your Discord bot',
                 'section' => 'bot',
             ],
@@ -79,7 +79,7 @@ class DiscordSettings extends Settings
             ],
             'client_secret' => [
                 'label' => 'Client Secret',
-                'type' => 'string',
+                'type' => 'secret',
                 'description' => 'The client secret for your Discord bot',
                 'section' => 'bot',
             ],

@@ -87,6 +87,8 @@ class RegisterController extends Controller
         }
         if ($this->websiteSettings->show_tos) {
             $validationRules['terms'] = ['required'];
+        } elseif ($this->websiteSettings->show_privacy) {
+            $validationRules['privacy'] = ['required'];
         }
 
         if ($this->userSettings->register_ip_check) {
@@ -125,7 +127,7 @@ class RegisterController extends Controller
             'root_admin' => false,
             'language' => 'en',
         ]);
-        
+
         if ($response->failed()) {
             Log::error('Pterodactyl Registration Error: ' . ($response->json()['errors'][0]['detail'] ?? 'Unknown error'));
             throw ValidationException::withMessages([
