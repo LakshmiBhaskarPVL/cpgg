@@ -378,13 +378,6 @@ class PterodactylClient
             );
         }
 
-        if ($response->failed()) {
-            self::throwException(
-                'Failed to create server on Pterodactyl',
-                $response->status()
-            );
-        }
-
         return $response;
     }
 
