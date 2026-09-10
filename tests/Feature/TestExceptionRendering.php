@@ -147,7 +147,11 @@ class TestExceptionRendering extends TestCase
         );
 
         $this->assertSame(404, $response->getStatusCode());
-        $this->assertStringContainsString('Invoice not found', $response->getContent());
+        $this->assertStringContainsString('application/json', $response->headers->get('Content-Type'));
+        $this->assertSame(
+            ['message' => 'Invoice not found'],
+            $response->getData(true)
+        );
     }
 
     public function test_invoice_exception_renders_web_error_page(): void

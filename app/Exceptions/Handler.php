@@ -87,11 +87,29 @@ class Handler extends ExceptionHandler
             return null;
         });
 
+        // Render payment exceptions as JSON for API requests and with the
+        // matching error page for web requests.
         $this->renderable(function (PaymentException $e, $request) {
+            $status = $e->getStatusCode();
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => $e->getMessage(),
-                ], $e->getStatusCode());
+                ], $status);
+            }
+
+            if (view()->exists('errors.' . $status)) {
+                return response()->view(
+                    'errors.' . $status,
+                    [
+                        'exception' => $e,
+                        'errorCode' => $status,
+                        'title' => 'Error',
+                        'message' => $e->getMessage(),
+                        'homeLink' => true,
+                    ],
+                    $status
+                );
             }
 
             return null;
@@ -107,23 +125,6 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        if ($exception instanceof PaymentException) {
-            $status = $exception->getStatusCode();
-
-            if (view()->exists('errors.' . $status)) {
-                return response()->view(
-                    'errors.' . $status,
-                    [
-                        'exception' => $exception,
-                        'errorCode' => $status,
-                        'title' => 'Error',
-                        'message' => $exception->getMessage(),
-                        'homeLink' => true,
-                    ],
-                    $status
-                );
-            }
-        }
         if ($this->isHttpException($exception)) {
             if (view()->exists('errors.' . $exception->getStatusCode())) {
                 return response()->view(
