@@ -76,7 +76,7 @@ class TestExceptions extends TestCase
         $exception = new PterodactylConnectionException();
 
         $this->assertInstanceOf(PterodactylException::class, $exception);
-        $this->assertSame(0, $exception->getStatusCode());
+        $this->assertNull($exception->getStatusCode());
     }
 
     public function test_pterodactyl_server_exception(): void

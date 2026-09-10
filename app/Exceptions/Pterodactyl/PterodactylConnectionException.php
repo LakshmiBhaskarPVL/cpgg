@@ -14,6 +14,6 @@ class PterodactylConnectionException extends PterodactylException
      */
     public function __construct(string $message = 'Unable to connect to Pterodactyl node. Please check if the node is online and accessible.', ?\Throwable $previous = null)
     {
-        parent::__construct($message, 0, $previous);
+        parent::__construct($message, null, $previous);
     }
 }

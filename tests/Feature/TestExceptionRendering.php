@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Exceptions\Api\ApiException;
+use App\Exceptions\Pterodactyl\PterodactylConnectionException;
 use App\Exceptions\Pterodactyl\PterodactylNotFoundException;
 use App\Exceptions\Server\InsufficientCreditsException;
 use App\Exceptions\Server\ServerLimitReachedException;
@@ -56,6 +57,26 @@ class TestExceptionRendering extends TestCase
 
         $this->assertSame(404, $response->getStatusCode());
         $this->assertStringContainsString('Resource does not exist', $response->getContent());
+    }
+
+    /**
+     * Verify the exception handler maps a PterodactylConnectionException
+     * (which carries no HTTP status code) to a 500 JSON response instead of
+     * crashing on an invalid status code.
+     *
+     * @return void
+     */
+    public function test_pterodactyl_connection_renders_500(): void
+    {
+        $handler = new \App\Exceptions\Handler($this->app);
+
+        $request = \Illuminate\Http\Request::create('/api/test', 'GET');
+        $request->headers->set('Accept', 'application/json');
+
+        $response = $handler->render($request, new PterodactylConnectionException());
+
+        $this->assertSame(500, $response->getStatusCode());
+        $this->assertStringContainsString('Unable to connect', $response->getContent());
     }
 
     /**
