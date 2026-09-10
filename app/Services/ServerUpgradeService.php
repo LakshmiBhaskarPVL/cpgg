@@ -90,7 +90,7 @@ class ServerUpgradeService
         } catch (PterodactylException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw new ServerUpgradeException($e->getMessage(), 500, $e);
+            throw new ServerUpgradeException($e->getMessage(), $e->getCode() ?: 500, $e);
         }
     }
 
